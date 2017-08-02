@@ -8,6 +8,9 @@
             "email": "mail@davidindra.cz"
         }
     ],
+    "autoload": {
+        "psr-0": {"MenickaCZ": "src/"}
+    },
     "require": {
         "guzzlehttp/guzzle": "6.3.0",
         "querypath/querypath": "3.0.5"
