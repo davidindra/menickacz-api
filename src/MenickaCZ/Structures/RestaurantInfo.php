@@ -6,7 +6,7 @@ class RestaurantInfo
     private $restaurant;
     private $address, $phone, $email, $webpage, $photoUrl, $opening;
 
-    public function __construct(Restaurant $restaurant, $address, $phone, $email, $webpage, $photoUrl, $opening)
+    public function __construct(Restaurant $restaurant, $address, $phone, $email, $webpage, $photoUrl, RestaurantOpening $opening)
     {
         $this->restaurant = $restaurant;
         $this->address = $address;
@@ -43,6 +43,13 @@ class RestaurantInfo
 
     public function __toString()
     {
-        return $this->restaurant->getName() . ': ' . $this->address . '; ' . $this->phone . '; ' . $this->email . '; ' . $this->webpage . '; ' . $this->photoUrl . '; ' . $this->opening . '; ';
+        return
+            $this->restaurant->getName() . ': ' .
+            'adresa: ' . $this->address . '; ' .
+            'telefon: ' . $this->phone . '; ' .
+            'e-mail: ' . $this->email . '; ' .
+            'web: ' . $this->webpage . '; ' .
+            'fotka: ' . $this->photoUrl . '; ' .
+            'otevírací doba: ' . $this->opening . '; ';
     }
 }

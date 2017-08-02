@@ -3,8 +3,8 @@ namespace MenickaCZ\Structures;
 
 class Restaurant
 {
-    public $name;
-    public $url;
+    private $name;
+    private $url;
 
     public function __construct(string $name, string $url)
     {

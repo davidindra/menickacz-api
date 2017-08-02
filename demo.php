@@ -16,6 +16,6 @@ echo
             $menicka->getCityByName(
                 $_GET['city']
             )
-        )[0]
+        )[5]
     )
 ;
