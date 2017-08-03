@@ -16,9 +16,9 @@ class RestaurantOpening
 
     public function __toString()
     {
-        $return = 'Otevírací doba: ';
+        $return = '';
         foreach ($this->days as $day){
-            $return .= PHP_EOL . $day;
+            $return .= '| ' . $day . ' |';
         }
         return $return;
     }

@@ -68,6 +68,10 @@ class MenickaCZ
         return null;
     }
 
+    /**
+     * @param City $city
+     * @return Restaurant[]
+     */
     public function getAvailableRestaurants(City $city)
     {
         $page = $this->parse($this->http->requestGet($city->getUrl()));
@@ -83,6 +87,25 @@ class MenickaCZ
         return $restaurants;
     }
 
+    /**
+     * @param string $name
+     * @param City $city
+     * @return Restaurant|null
+     */
+    public function getRestaurantByNameAndCity(string $name, City $city)
+    {
+        foreach($this->getAvailableRestaurants($city) as $restaurant){
+            if(levenshtein(strtolower($restaurant->getName()), strtolower($name), 3, 1, 3) < 5)
+                return $restaurant;
+        }
+
+        return null;
+    }
+
+    /**
+     * @param Restaurant $restaurant
+     * @return RestaurantInfo
+     */
     public function getRestaurantInfo(Restaurant $restaurant)
     {
         $page = $this->parse($this->http->requestGet($restaurant->getUrl()));
@@ -102,13 +125,13 @@ class MenickaCZ
 
         $lines = $page->find('div.oteviracidoba div.in div.line');
         $dayGenerator = function($weekDay, $data){
-            $data = trim($data);
+            $data = substr(trim($data), 4);
 
             if(strpos(strtolower($data), 'nonstop') !== false)
                 return new RestaurantOpeningDay($weekDay, 0, 24 * 60);
             elseif(strpos(strtolower($data), 'zavřeno') !== false)
                 return new RestaurantOpeningDay($weekDay, 0, 0);
-            elseif(strpos($data, ':') === false) // we dunno the state
+            elseif(strpos($data, '.') === false && strpos($data, ':') === false) // we dunno the state
                 return new RestaurantOpeningDay($weekDay, 0, 0);
             else
                 return new RestaurantOpeningDay(
