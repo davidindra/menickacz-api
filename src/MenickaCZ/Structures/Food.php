@@ -22,6 +22,6 @@ class Food
 
     public function __toString()
     {
-        return $this->name . ', ' . $this->url;
+        return $this->name . ' (' . $this->price . ',-)';
     }
 }

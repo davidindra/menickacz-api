@@ -58,8 +58,13 @@ class RestaurantOpeningDay
     }
 
     public static function timeStringToNumber(string $time){
-        list($hours, $minutes) = explode('.', trim($time));
-        return $hours * 60 + $minutes;
+        if(strpos(trim($time), '.') == false){
+            list($hours, $minutes) = explode(':', trim($time));
+            return $hours * 60 + $minutes;
+        }else{
+            list($hours, $minutes) = explode('.', trim($time));
+            return $hours * 60 + $minutes;
+        }
     }
 
     public function __toString()

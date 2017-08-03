@@ -2,6 +2,9 @@
 namespace MenickaCZ;
 
 use MenickaCZ\Structures\City;
+use MenickaCZ\Structures\Food;
+use MenickaCZ\Structures\Menu;
+use MenickaCZ\Structures\MenuSet;
 use MenickaCZ\Structures\Restaurant;
 use MenickaCZ\Structures\RestaurantInfo;
 use MenickaCZ\Structures\RestaurantOpening;
@@ -160,5 +163,51 @@ class MenickaCZ
             trim($photoUrl) == '' ? null : $photoUrl,
             $opening
         );
+    }
+
+    public function getMenuSet(Restaurant $restaurant){
+        $page = $this->parse($this->http->requestGet($restaurant->getUrl()));
+
+        $menusArray = [];
+        $foodsBuffer = [];
+        $soup = null;
+        $food = null;
+        $currentDate = null;
+        foreach($page->find('div.menicka div') as $div){
+            if($div->hasClass('datum')){
+                if($currentDate != null && count($foodsBuffer)){
+                    //echo $currentDate->format('j.n.Y');
+                    //var_dump($foodsBuffer);
+                    $menusArray[] = new Menu($currentDate, $foodsBuffer);
+                    $foodsBuffer = [];
+                }
+
+                $currentDate = \DateTime::createFromFormat('j.n.Y', trim(explode(' ', $div->text())[1]));
+                continue;
+            }
+
+            if($div->hasClass('nabidka_1')){
+                $soup = trim($div->text());
+                continue;
+            }
+
+            if($div->hasClass('nabidka_2')){
+                $food = trim($div->text());
+                continue;
+            }
+
+            if($div->hasClass('cena')){
+                if($soup != null){
+                    $foodsBuffer[] = new Food($soup, trim($div->text()));
+                }else{
+                    $foodsBuffer[] = new Food($food, trim($div->text()));
+                }
+                $food = null;
+                $soup = null;
+                continue;
+            }
+        }
+
+        return new MenuSet($menusArray);
     }
 }

@@ -39,7 +39,18 @@ if(!isset($_GET['city'])){
                 if($restaurantInfo->getEmail()) echo 'E-mail: ' . $restaurantInfo->getEmail() . '<br>';
                 if($restaurantInfo->getPhone()) echo 'Telefon: ' . $restaurantInfo->getPhone() . '<br>';
                 if($restaurantInfo->getWebpage()) echo 'Web: <a href="http://' . $restaurantInfo->getWebpage() . '">' . $restaurantInfo->getWebpage() . '</a><br>';
-                echo 'Otevírací doba: ' . $restaurantInfo->getOpening();
+                echo 'Otevírací doba: ' . $restaurantInfo->getOpening() . '<br><br>';
+
+                echo '<h3>Jídelní lístek</h3>';
+
+                $menuSet = $menicka->getMenuSet($restaurant);
+                foreach ($menuSet->getMenus() as $menu) {
+                    echo '<br><b>Lístek ' . $menu->getDate()->format('j.n.Y') . '</b><br>';
+
+                    foreach ($menu->getFoods() as $food){
+                        echo '&nbsp;- ' . $food->getName() . ' (' . $food->getPrice() . ',-)<br>';
+                    }
+                }
             }
         }
     }

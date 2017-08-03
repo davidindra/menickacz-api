@@ -22,6 +22,10 @@ class Menu
 
     public function __toString()
     {
-        return 'Jídelní lístek na ' . $this->date . '(' . $this->foods[0]->getName() . ')';
+        $return = 'Jídelní lístek na ' . $this->date->format('j.n.Y') . ': <br>';
+        foreach ($this->foods as $food){
+            $return .= $food;
+        }
+        return $return;
     }
 }
