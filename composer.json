@@ -2,6 +2,7 @@
     "name": "davidindra/menickacz-api",
     "description": "Parsing API for Menicka.cz",
     "type": "library",
+    "license": "CC-BY-NC-SA-4.0",
     "authors": [
         {
             "name": "David Indra",
