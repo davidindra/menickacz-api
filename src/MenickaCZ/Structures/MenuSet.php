@@ -28,7 +28,7 @@ class MenuSet
     {
         $return = '';
         foreach ($this->menus as $menu){
-            $return .= PHP_EOL . $menu;
+            $return .= $menu . '<br>';
         }
         return $return;
     }

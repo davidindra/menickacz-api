@@ -127,8 +127,10 @@ class MenickaCZ
         $photoUrl = $page->find('div.foto div.hlavni a')->attr('href');
 
         $lines = $page->find('div.oteviracidoba div.in div.line');
+
         $dayGenerator = function($weekDay, $data){
             $data = substr(trim($data), 4);
+            $data = str_replace('dnes', '', $data);
 
             if(strpos(strtolower($data), 'nonstop') !== false)
                 return new RestaurantOpeningDay($weekDay, 0, 24 * 60);
@@ -144,6 +146,18 @@ class MenickaCZ
                 );
         };
 
+        $lunchTimeString = $page->find('div.obedovycas')->first()->text();
+
+        $lunchTimeGenerator = function($data){
+            $data = explode('Menu:', $data)[1];
+
+            return strpos($data, '–') === false ? null : new RestaurantOpeningDay(
+                8,
+                RestaurantOpeningDay::timeStringToNumber(trim(explode('–', $data)[0])),
+                RestaurantOpeningDay::timeStringToNumber(trim(explode('–', $data)[1]))
+            );
+        };
+
         $opening = new RestaurantOpening([
             $dayGenerator(1, $lines->eq(0)->text()),
             $dayGenerator(2, $lines->eq(1)->text()),
@@ -152,7 +166,8 @@ class MenickaCZ
             $dayGenerator(5, $lines->eq(4)->text()),
             $dayGenerator(6, $lines->eq(5)->text()),
             $dayGenerator(7, $lines->eq(6)->text())
-        ]);
+        ],
+            $lunchTimeGenerator($lunchTimeString));
 
         return new RestaurantInfo(
             $restaurant,
@@ -168,46 +183,56 @@ class MenickaCZ
     public function getMenuSet(Restaurant $restaurant){
         $page = $this->parse($this->http->requestGet($restaurant->getUrl()));
 
-        $menusArray = [];
-        $foodsBuffer = [];
-        $soup = null;
-        $food = null;
-        $currentDate = null;
-        foreach($page->find('div.menicka div') as $div){
-            if($div->hasClass('datum')){
-                if($currentDate != null && count($foodsBuffer)){
-                    //echo $currentDate->format('j.n.Y');
-                    //var_dump($foodsBuffer);
-                    $menusArray[] = new Menu($currentDate, $foodsBuffer);
-                    $foodsBuffer = [];
+        $menus = [];
+
+        foreach($page->find('div.menicka') as $menu){
+            $date = \DateTime::createFromFormat(
+                'j.n.Y',
+                trim(
+                    explode(
+                        ' ',
+                        $menu->find('div.datum')->first()->text()
+                    )[1]
+                )
+            );
+
+            $foods = [];
+
+            $order = 0;
+            $food = null;
+            $price = 0;
+
+            foreach($menu->find('div') as $div){
+                if($div->hasClass('poradi_1') || $div->hasClass('poradi_2')){
+                    if(!is_null($food)) {
+                        $foods[] = new Food($order, $food, $price);
+
+                        //$order = 0;
+                        $food = null;
+                        $price = 0;
+                    }
+
+                    $order = intval(trim($div->text()));
                 }
 
-                $currentDate = \DateTime::createFromFormat('j.n.Y', trim(explode(' ', $div->text())[1]));
-                continue;
-            }
-
-            if($div->hasClass('nabidka_1')){
-                $soup = trim($div->text());
-                continue;
-            }
-
-            if($div->hasClass('nabidka_2')){
-                $food = trim($div->text());
-                continue;
-            }
-
-            if($div->hasClass('cena')){
-                if($soup != null){
-                    $foodsBuffer[] = new Food($soup, trim($div->text()));
-                }else{
-                    $foodsBuffer[] = new Food($food, trim($div->text()));
+                if($div->hasClass('nabidka_1') || $div->hasClass('nabidka_2')){
+                    $food = trim($div->text());
+                    continue;
                 }
-                $food = null;
-                $soup = null;
-                continue;
+
+                if($div->hasClass('cena')){
+                    $price = intval(trim($div->text()));
+                    continue;
+                }
             }
+
+            if(!is_null($food)){ // probably always true (last food)
+                $foods[] = new Food($order, $food, $price);
+            }
+
+            if(count($foods) > 0) $menus[] = new Menu($date, $foods);
         }
 
-        return new MenuSet($menusArray);
+        return new MenuSet($menus);
     }
 }

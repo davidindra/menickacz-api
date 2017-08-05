@@ -38,6 +38,7 @@ class RestaurantOpeningDay
                 case 5: return 'Pátek';
                 case 6: return 'Sobota';
                 case 7: return 'Neděle';
+                case 8: return 'Obědový čas';
             }
         };
 

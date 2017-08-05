@@ -24,7 +24,7 @@ class Menu
     {
         $return = 'Jídelní lístek na ' . $this->date->format('j.n.Y') . ': <br>';
         foreach ($this->foods as $food){
-            $return .= $food;
+            $return .= '&nbsp;- ' . $food . '<br>';
         }
         return $return;
     }

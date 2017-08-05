@@ -3,10 +3,16 @@ require 'vendor/autoload.php';
 
 use MenickaCZ\GuzzleHttpClient;
 use MenickaCZ\MenickaCZ;
+use MenickaCZ\SqliteCache;
+
+ini_set('display_errors', 1);
 
 echo '<h1>Meníčka.cz</h1>';
 
-$menicka = new MenickaCZ(new GuzzleHttpClient('http://menicka.cz/'));
+$cache = new SqliteCache(__DIR__ . '/cache.db');
+//$cache = new \MenickaCZ\NullCache();
+
+$menicka = new MenickaCZ(new GuzzleHttpClient('http://menicka.cz/', $cache));
 
 if(!isset($_GET['city'])){
     echo 'Města k dispozici: ';
@@ -48,7 +54,8 @@ if(!isset($_GET['city'])){
                     echo '<br><b>Lístek ' . $menu->getDate()->format('j.n.Y') . '</b><br>';
 
                     foreach ($menu->getFoods() as $food){
-                        echo '&nbsp;- ' . $food->getName() . ' (' . $food->getPrice() . ',-)<br>';
+                        //echo '&nbsp;- ' . $food->getName() . ' (' . $food->getPrice() . ',-)<br>';
+                        echo $food . '<br>';
                     }
                 }
             }

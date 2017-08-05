@@ -10,7 +10,9 @@ class GuzzleHttpClient implements IHttpClient
 
     private $jar;
 
-    public function __construct(string $baseUrl = null)
+    private $cache;
+
+    public function __construct(string $baseUrl = null, ICache $cache = null)
     {
         $this->jar = new CookieJar();
 
@@ -19,9 +21,27 @@ class GuzzleHttpClient implements IHttpClient
             'cookies' => $this->jar,
             'allow_redirects' => true
         ]);
+
+        $this->cache = $cache;
     }
 
     public function requestGet(string $url): string
+    {
+        if(is_null($this->cache)) {
+            return $this->makeRequestGet($url);
+        }else{
+            return $this->cache->cache(
+                'get-' . strval($this->guzzle->getConfig('base_uri')) . $url,
+                function($url){
+                    return $this->makeRequestGet($url);
+                },
+                [$url],
+                new \DateInterval('PT30M')
+            );
+        }
+    }
+
+    private function makeRequestGet(string $url): string
     {
         $response = $this->guzzle->get($url);
 
