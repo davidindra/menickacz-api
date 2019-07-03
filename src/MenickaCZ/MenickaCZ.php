@@ -185,26 +185,27 @@ class MenickaCZ
 
         $menus = [];
 
-        foreach($page->find('div.menicka') as $menu){
+        foreach($page->find('div.menicka') as $menu) {
             $date = \DateTime::createFromFormat(
                 'j.n.Y',
                 trim(
                     explode(
                         ' ',
-                        $menu->find('div.datum')->first()->text()
+                        $menu->find('div.nadpis')->first()->text()
                     )[1]
                 )
             );
-
+					
             $foods = [];
 
             $order = 0;
             $food = null;
             $price = 0;
 
-            foreach($menu->find('div') as $div){
-                if($div->hasClass('poradi_1') || $div->hasClass('poradi_2')){
-                    if(!is_null($food)) {
+            foreach ($menu->find('ul li') as $li) {
+                $orderEl = $li->find(".polozka span.poradi");
+                if ($orderEl) {
+                    if (!is_null($food)) {
                         $foods[] = new Food($order, $food, $price);
 
                         //$order = 0;
@@ -212,25 +213,24 @@ class MenickaCZ
                         $price = 0;
                     }
 
-                    $order = intval(trim($div->text()));
+                    $order = intval(trim($orderEl->text()));
                 }
-
-                if($div->hasClass('nabidka_1') || $div->hasClass('nabidka_2')){
-                    $food = trim($div->text());
-                    continue;
+                $itemEl = $li->find("div.polozka");
+                if ($itemEl) {
+                    $itemEl->remove("span.poradi");
+                    $food = trim($itemEl->text());
                 }
-
-                if($div->hasClass('cena')){
-                    $price = intval(trim($div->text()));
-                    continue;
+                $priceEl = $li->find("div.cena");
+                if ($priceEl) {
+                    $price = intval(trim($priceEl->text()));
                 }
             }
 
-            if(!is_null($food)){ // probably always true (last food)
+            if (!is_null($food)) { // probably always true (last food)
                 $foods[] = new Food($order, $food, $price);
             }
 
-            if(count($foods) > 0) $menus[] = new Menu($date, $foods);
+            if (count($foods) > 0) $menus[] = new Menu($date, $foods);
         }
 
         return new MenuSet($menus);
