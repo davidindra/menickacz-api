@@ -217,6 +217,7 @@ class MenickaCZ
                 }
                 $itemEl = $li->find("div.polozka");
                 if ($itemEl) {
+                    $itemEl->remove("em");
                     $itemEl->remove("span.poradi");
                     $food = trim($itemEl->text());
                 }
