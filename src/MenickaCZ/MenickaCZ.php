@@ -36,7 +36,7 @@ class MenickaCZ
      */
     private function parse(string $source)
     {
-        return \QueryPath::withHTML5(iconv('CP1250', 'UTF-8', $source));
+        return \QueryPath::withHTML5(iconv('CP1250', 'UTF-8//IGNORE', $source));
     }
 
     /**
